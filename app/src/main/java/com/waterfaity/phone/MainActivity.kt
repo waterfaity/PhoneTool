@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import com.waterfaity.photo.R
 import kotlinx.android.synthetic.main.activity_main.*
@@ -31,8 +32,12 @@ class MainActivity : AppCompatActivity() {
             )
         }
         //13764 312271
-
         NameTool.getData();
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) return true
+        return super.onKeyDown(keyCode, event)
     }
 
     fun add(view: View) {
@@ -82,12 +87,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun genePhoto(i: Int, length: Int): String {
-
         var photoNum = i.toString()
         val dLen = length - photoNum.length
         if (length - dLen > 0) {
-
-
             for (i in 0 until dLen) {
                 photoNum = "0" + photoNum
             }
