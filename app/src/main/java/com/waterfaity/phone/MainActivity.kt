@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity() {
         val forLength = endNum.text.toString().toInt()
 
         object : AsyncTask<Void, String, Int>() {
-
             override fun doInBackground(vararg params: Void?): Int {
                 var num = 0;
                 var index = 0
