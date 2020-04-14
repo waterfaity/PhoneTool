@@ -1,4 +1,4 @@
-package com.waterfaity.photo;
+package com.waterfaity.phone;
 
 import java.util.BitSet;
 

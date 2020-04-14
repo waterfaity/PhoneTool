@@ -1,16 +1,14 @@
-package com.waterfaity.photo;
+package com.waterfaity.phone;
 
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.Contacts;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-public class PhotoAddUtils {
+public class ContactAddUtils {
 
 
     /**
