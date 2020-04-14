@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 super.onProgressUpdate(*values)
                 share.edit().putString("current_phone", values[0]).apply()
                 content.text = (values[0])
-                remain.text = (forLength - (values[0] ?: "0").toInt()).toString()
+                remain.text = ((forLength + start) - (values[0] ?: "0").toInt()).toString()
             }
 
             override fun onPostExecute(result: Int) {
