@@ -20,7 +20,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+
         share = getSharedPreferences("phone_history", Context.MODE_PRIVATE)
+        frontNum.setText(share.getString("front_num", "13764"))
         startNum.setText(share.getString("current_phone", "0"))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -32,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         //13764 312271
-        NameTool.getData();
+//        NameTool.getData();
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -42,21 +45,23 @@ class MainActivity : AppCompatActivity() {
 
     fun add(view: View) {
         isRunning = true
+        share.edit().putString("front_num", frontNum.text.toString()).apply()
+        val front = frontNum.text.toString();
         val start = startNum.text.toString().toInt()
         val forLength = endNum.text.toString().toInt()
 
         object : AsyncTask<Void, String, Int>() {
 
             override fun doInBackground(vararg params: Void?): Int {
-
                 var num = 0;
                 var index = 0
                 for (i in start..(start + forLength)) {
                     index = i
                     if (!isRunning) return index
                     val generateName = "员工" + NameTool.generateName();
-                    val endPhone = genePhoto(i, 6);
-                    val fullPhone = "13764" + endPhone
+                    val endPhone = genePhoto(i, 11 - front.length);
+                    val fullPhone = front + endPhone
+                    if (fullPhone.length > 11) return index;
 
 //                    val regex = "(\\d)\\1{2,}"
 //                    val contains = fullPhone.contains(Regex(regex))
