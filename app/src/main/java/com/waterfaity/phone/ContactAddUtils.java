@@ -1,12 +1,21 @@
 package com.waterfaity.phone;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.util.Log;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContactAddUtils {
 
@@ -78,5 +87,48 @@ public class ContactAddUtils {
 
         }
 
+    }
+
+
+    /**
+     * 批量添加通讯录
+     *
+     * @throws OperationApplicationException
+     * @throws RemoteException
+     */
+    public static void addContactList(Context context, List<ContactEntity> list)
+            throws RemoteException, OperationApplicationException {
+        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        int rawContactInsertIndex = 0;
+        for (ContactEntity contact : list) {
+            rawContactInsertIndex = ops.size(); // 有了它才能给真正的实现批量添加
+
+            ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                    .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                    .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                    .withYieldAllowed(true).build());
+
+            // 添加姓名
+            ops.add(ContentProviderOperation
+                    .newInsert(
+                            android.provider.ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.RawContacts.Data.RAW_CONTACT_ID,
+                            rawContactInsertIndex)
+                    .withValue(ContactsContract.Contacts.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, contact.getName())
+                    .withYieldAllowed(true).build());
+            // 添加号码
+            ops.add(ContentProviderOperation
+                    .newInsert(
+                            android.provider.ContactsContract.Data.CONTENT_URI)
+                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID,
+                            rawContactInsertIndex)
+                    .withValue(ContactsContract.RawContacts.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, contact.getPhone())
+                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.LABEL, "").withYieldAllowed(true).build());
+        }
+        // 真正添加
+        context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
     }
 }

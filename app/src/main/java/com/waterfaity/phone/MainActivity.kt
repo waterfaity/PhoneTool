@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
+        tv_noti.visibility = View.GONE
 
         share = getSharedPreferences("phone_history", Context.MODE_PRIVATE)
         frontNum.setText(share.getString("front_num", "13764"))
@@ -44,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun add(view: View) {
+        tv_noti.visibility = View.VISIBLE
+
         isRunning = true
         share.edit().putString("front_num", frontNum.text.toString()).apply()
         val front = frontNum.text.toString();
@@ -52,9 +54,14 @@ class MainActivity : AppCompatActivity() {
 
         object : AsyncTask<Void, String, Int>() {
             override fun doInBackground(vararg params: Void?): Int {
+
+
+                var dataList = ArrayList<ContactEntity>()
+
+
                 var num = 0;
                 var index = 0
-                for (i in start..(start + forLength)) {
+                for (i in start until start + forLength) {
                     index = i
                     if (!isRunning) return index
                     val generateName = "员工" + NameTool.generateName();
@@ -67,26 +74,28 @@ class MainActivity : AppCompatActivity() {
 //                    if (!contains) {
                     num++
                     publishProgress(endPhone)
-                    ContactAddUtils.addContact(
-                        applicationContext,
-                        ContactEntity(generateName, fullPhone)
-                    )
+//                    ContactAddUtils.addContact(
+//                        applicationContext,
+//                        ContactEntity(generateName, fullPhone)
+//                    )
+                    dataList.add(ContactEntity(generateName, fullPhone))
 //                    }
-
                 }
+                ContactAddUtils.addContactList(applicationContext, dataList);
                 return index
             }
 
             override fun onProgressUpdate(vararg values: String?) {
                 super.onProgressUpdate(*values)
                 share.edit().putString("current_phone", values[0]).apply()
-                content.text = (values[0])
-                remain.text = ((forLength + start) - (values[0] ?: "0").toInt()).toString()
+//                content.text = (values[0])
+//                remain.text = ((forLength + start) - (values[0] ?: "0").toInt()).toString()
             }
 
             override fun onPostExecute(result: Int) {
                 super.onPostExecute(result)
                 startNum.setText(result.toString())
+                tv_noti.visibility = View.GONE
             }
         }.execute()
     }
