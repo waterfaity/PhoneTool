@@ -7,7 +7,6 @@ import android.os.AsyncTask
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -44,12 +43,13 @@ class MainActivity : AppCompatActivity() {
 
     fun add(view: View) {
         tv_noti.visibility = View.VISIBLE
+        tv_noti.text = "添加中..."
 
         isRunning = true
         share.edit().putString("front_num", frontNum.text.toString()).apply()
         val front = frontNum.text.toString();
         val start = startNum.text.toString().toInt()
-        val forLength = endNum.text.toString().toInt()
+        val forLength = lengthNum.text.toString().toInt()
         val perLimitLen = perLimit.text.toString().toInt()
 
         if (front.toInt() < 0) {
@@ -121,5 +121,26 @@ class MainActivity : AppCompatActivity() {
 
     fun stop(view: View) {
         isRunning = false;
+    }
+
+    fun delete(view: View) {
+        if (delete.text.toString() != "1") {
+            showToast("input 1 to delete")
+            return
+        }
+        tv_noti.visibility = View.VISIBLE
+        tv_noti.text = "删除中..."
+        delete.setText("")
+        object : AsyncTask<Void, String, Int>() {
+            override fun doInBackground(vararg params: Void?): Int {
+                ContactAddUtils.deleteContact(applicationContext)
+                return 0
+            }
+
+            override fun onPostExecute(result: Int) {
+                super.onPostExecute(result)
+                tv_noti.visibility = View.GONE
+            }
+        }.execute()
     }
 }
