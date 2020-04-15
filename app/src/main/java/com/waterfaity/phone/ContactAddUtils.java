@@ -113,7 +113,7 @@ public class ContactAddUtils {
 
     private static void addContactSubList(Context context, List<ContactEntity> subList) throws OperationApplicationException, RemoteException {
 
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
         int rawContactInsertIndex = 0;
         for (ContactEntity contact : subList) {
             rawContactInsertIndex = ops.size(); // 有了它才能给真正的实现批量添加
@@ -247,17 +247,5 @@ public class ContactAddUtils {
 
         private String data_id;
         private String raw_contact_id;
-    }
-
-    public static void delete(Context context) {
-        int dataDelete = context.getContentResolver().delete(ContactsContract.Data.CONTENT_URI,
-                ContactsContract.Data.DISPLAY_NAME + " LIKE ? "
-                        + " and " + ContactsContract.Data.MIMETYPE + " = ? "
-                , new String[]{"员工%", ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE});
-
-        int rawDelete = context.getContentResolver().delete(ContactsContract.RawContacts.CONTENT_URI,
-                ContactsContract.RawContacts.DISPLAY_NAME_PRIMARY + " LIKE ? ",
-                new String[]{"员工%"});
-
     }
 }
