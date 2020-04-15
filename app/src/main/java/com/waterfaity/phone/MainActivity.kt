@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.widget.Toast
 import com.waterfaity.photo.R
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -34,8 +35,6 @@ class MainActivity : AppCompatActivity() {
                 ), 1001
             )
         }
-        //13764 312271
-//        NameTool.getData();
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -51,15 +50,33 @@ class MainActivity : AppCompatActivity() {
         val front = frontNum.text.toString();
         val start = startNum.text.toString().toInt()
         val forLength = endNum.text.toString().toInt()
+        val perLimitLen = perLimit.text.toString().toInt()
+
+        if (front.toInt() < 0) {
+            showToast("front > 0");
+            return
+        }
+
+        if (forLength < 0) {
+            showToast("length > 0");
+            return
+        }
+
+        if (forLength < 0) {
+            showToast("length > 0");
+            return
+        }
+
+        if (perLimitLen.toInt() < 0) {
+            showToast("perLimit > 0");
+            return
+        }
+
 
         object : AsyncTask<Void, String, Int>() {
             override fun doInBackground(vararg params: Void?): Int {
-
-
                 var dataList = ArrayList<ContactEntity>()
 
-
-                var num = 0;
                 var index = 0
                 for (i in start until start + forLength) {
                     index = i
@@ -67,37 +84,28 @@ class MainActivity : AppCompatActivity() {
                     val generateName = "员工" + NameTool.generateName();
                     val endPhone = genePhoto(i, 11 - front.length);
                     val fullPhone = front + endPhone
-                    if (fullPhone.length > 11) return index;
-
-//                    val regex = "(\\d)\\1{2,}"
-//                    val contains = fullPhone.contains(Regex(regex))
-//                    if (!contains) {
-                    num++
-                    publishProgress(endPhone)
-//                    ContactAddUtils.addContact(
-//                        applicationContext,
-//                        ContactEntity(generateName, fullPhone)
-//                    )
-                    dataList.add(ContactEntity(generateName, fullPhone))
-//                    }
+                    if (fullPhone.length <= 11) {
+                        dataList.add(ContactEntity(generateName, fullPhone))
+                    }
                 }
-                ContactAddUtils.addContactList(applicationContext, dataList);
+                ContactAddUtils.addContactList(
+                    applicationContext,
+                    dataList, perLimitLen
+                )
                 return index
-            }
-
-            override fun onProgressUpdate(vararg values: String?) {
-                super.onProgressUpdate(*values)
-                share.edit().putString("current_phone", values[0]).apply()
-//                content.text = (values[0])
-//                remain.text = ((forLength + start) - (values[0] ?: "0").toInt()).toString()
             }
 
             override fun onPostExecute(result: Int) {
                 super.onPostExecute(result)
-                startNum.setText(result.toString())
+                share.edit().putString("current_phone", (result + 1).toString()).apply()
+                startNum.setText((result + 1).toString())
                 tv_noti.visibility = View.GONE
             }
         }.execute()
+    }
+
+    private fun showToast(content: String) {
+        Toast.makeText(this, content, Toast.LENGTH_SHORT).show()
     }
 
     private fun genePhoto(i: Int, length: Int): String {
@@ -109,12 +117,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return photoNum
-
     }
 
     fun stop(view: View) {
         isRunning = false;
     }
-
-
 }

@@ -2,6 +2,7 @@ package com.waterfaity.phone;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -96,11 +97,30 @@ public class ContactAddUtils {
      * @throws OperationApplicationException
      * @throws RemoteException
      */
-    public static void addContactList(Context context, List<ContactEntity> list)
-            throws RemoteException, OperationApplicationException {
+    public static void addContactList(Context context, List<ContactEntity> list, int perLimit) throws OperationApplicationException, RemoteException {
+
+
+        if (list.size() > perLimit) {
+            int num = list.size() / perLimit + (list.size() % perLimit == 0 ? 0 : 1);
+            for (int i = 0; i < num; i++) {
+                int from = i * perLimit;
+                int end = from + perLimit;
+
+                if (end > list.size()) {
+                    end = list.size();
+                }
+                addContactSubList(context, list.subList(from, end));
+            }
+        } else {
+            addContactSubList(context, list);
+        }
+    }
+
+    private static void addContactSubList(Context context, List<ContactEntity> subList) throws OperationApplicationException, RemoteException {
+
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
         int rawContactInsertIndex = 0;
-        for (ContactEntity contact : list) {
+        for (ContactEntity contact : subList) {
             rawContactInsertIndex = ops.size(); // 有了它才能给真正的实现批量添加
 
             ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
@@ -111,7 +131,7 @@ public class ContactAddUtils {
             // 添加姓名
             ops.add(ContentProviderOperation
                     .newInsert(
-                            android.provider.ContactsContract.Data.CONTENT_URI)
+                            ContactsContract.Data.CONTENT_URI)
                     .withValueBackReference(ContactsContract.RawContacts.Data.RAW_CONTACT_ID,
                             rawContactInsertIndex)
                     .withValue(ContactsContract.Contacts.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
@@ -120,7 +140,7 @@ public class ContactAddUtils {
             // 添加号码
             ops.add(ContentProviderOperation
                     .newInsert(
-                            android.provider.ContactsContract.Data.CONTENT_URI)
+                            ContactsContract.Data.CONTENT_URI)
                     .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID,
                             rawContactInsertIndex)
                     .withValue(ContactsContract.RawContacts.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
@@ -130,5 +150,10 @@ public class ContactAddUtils {
         }
         // 真正添加
         context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+    }
+
+    private static void deleteContact(Context context) {
+        ContentResolver contentResolver = context.getContentResolver();
+//        contentResolver.query(ContactsContract.RawContacts.CONTENT_URI,new  String[]{}," like '员工'%")
     }
 }
