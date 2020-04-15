@@ -16,7 +16,6 @@ import java.util.List;
 
 public class ContactAddUtils {
 
-
     /**
      * 添加联系人到本机
      *
